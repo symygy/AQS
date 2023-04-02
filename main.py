@@ -119,7 +119,6 @@ if __name__ == '__main__':
     save_resp_to_file(today_air_data)
 
     air_qual_data = read_resp_from_file()
-    get_stations_data(air_qual_data)
 
     insert_many_docs(get_stations_data(air_qual_data))
 
