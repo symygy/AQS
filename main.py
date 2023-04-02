@@ -1,11 +1,15 @@
-
+from dotenv import load_dotenv, find_dotenv
 from collections import defaultdict
 import requests
 import json
-from config import *
 from aqs_db import insert_many_docs
 from datetime import date
+import os
 
+load_dotenv(find_dotenv())
+LOGIN = os.environ.get('LOGIN')
+PASS = os.environ.get('PASS')
+URL = os.environ.get('URL')
 
 
 def get_JWT():
