@@ -16,15 +16,28 @@ collections = aqs_db.list_collection_names()
 
 
 def insert_doc(document: dict):
-    collection = aqs_db.AQS
-    inserted_id = collection.insert_one(document).inserted_id
+    inserted_id = aqs_db.AQS.insert_one(document).inserted_id
     print(inserted_id)
 
 
 def insert_many_docs(documents: list):
-    collection = aqs_db.AQS
-    inserted_ids = collection.insert_many(documents).inserted_ids
+    inserted_ids = aqs_db.AQS.insert_many(documents).inserted_ids
     print(f"{len(inserted_ids)} documents were successfully inserted to DB")
+
+
+def get_all_docs():
+    data = aqs_db.AQS.find()
+    return list(data)
+
+def find_docs_by_date(date: str):
+    data = list(aqs_db.AQS.find({ "info.date": f'{date}' }))
+    return data or 'No data found'
+
+def find_docs_by_name(name: str):
+    data = list(aqs_db.AQS.find({ "info.name": f'{name}' }))
+    return data or 'No data found'
+
+
 
 # production = client.production # jesli podam nazwe ktora nie istnieje, to zostanie ona utworzona
 # person_collection = production.person_collection
