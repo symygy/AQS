@@ -2,6 +2,7 @@ from dotenv import load_dotenv, find_dotenv
 import os
 from pymongo import MongoClient
 
+
 load_dotenv(find_dotenv())
 password = os.environ.get('PASS')
 
