@@ -1,7 +1,7 @@
+from bson.objectid import ObjectId
 from dotenv import load_dotenv, find_dotenv
 import os
 from pymongo import MongoClient
-
 
 load_dotenv(find_dotenv())
 password = os.environ.get('PASS')
@@ -27,19 +27,24 @@ def insert_many_docs(documents: list):
 
 
 def get_all_docs():
-    data = aqs_db.AQS.find()
-    return list(data)
+    return list(aqs_db.AQS.find())
+
 
 def find_docs_by_date(date: str):
-    data = list(aqs_db.AQS.find({ "info.date": f'{date}' }))
-    return data or 'No data found'
+    return list(aqs_db.AQS.find({"info.date": f'{date}'}))
+
 
 def find_docs_by_name(name: str):
-    data = list(aqs_db.AQS.find({ "info.name": f'{name}' }))
-    return data or 'No data found'
+    return list(aqs_db.AQS.find({"info.name": f'{name}'}))
 
 
+def find_docs_by_id(obj_id: str):
+    if not ObjectId.is_valid(obj_id):
+        return []
 
-# production = client.production # jesli podam nazwe ktora nie istnieje, to zostanie ona utworzona
-# person_collection = production.person_collection
+    return list(aqs_db.AQS.find({"_id": ObjectId(obj_id)}))
+
+
+def find_docs_by_date_range(start_date: str, end_date: str):
+    return list(aqs_db.AQS.find({"info.date": {"$gt": f'{start_date}', "$lt": f'{end_date}'}}))
 
