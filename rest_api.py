@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import json
 from bson.json_util import dumps
@@ -31,12 +31,16 @@ data_fields = {
 
 
 def abort_if_no_data_found(data: list):
-    if len(data) == 0:
+    if not data:
         abort(404, ExceptionKey="No data found")
 
 # prawdopodobnie do usuniecia
 # def parse_data_from_mongo(data):
 #     return json.loads(dumps(data))
+
+query_args = reqparse.RequestParser()
+query_args.add_argument('start', type=str)
+query_args.add_argument('end', type=str)
 
 
 class AirQualitySearchDate(Resource):
@@ -49,8 +53,8 @@ class AirQualitySearchDate(Resource):
 
 class AirQualitySearchName(Resource):
     @marshal_with(data_fields)
-    def get(self, value):
-        data = find_docs_by_name(value)
+    def get(self, name):
+        data = find_docs_by_name(name)
         abort_if_no_data_found(data)
         return data
 
@@ -66,16 +70,17 @@ class AirQualitySearchId(Resource):
 class AirQualitySearchDateRange(Resource):
     @marshal_with(data_fields)
     #TODO jak przesylac przedzial daty?
-    def get(self, value):
-        data = find_docs_by_date_range('2023-04-02', '2023-04-04')
+    def get(self, name):
+        args = query_args.parse_args()
+        data = find_docs_by_date_range(args['start'], args['end'], name)
         abort_if_no_data_found(data)
         return data
 
 
 api.add_resource(AirQualitySearchDate, '/search/date/<string:value>')
-api.add_resource(AirQualitySearchName, '/search/name/<string:value>')
+api.add_resource(AirQualitySearchName, '/search/name/<string:name>')
 api.add_resource(AirQualitySearchId, '/search/id/<string:value>')
-api.add_resource(AirQualitySearchDateRange, '/search/daterange/<string:value>')
+api.add_resource(AirQualitySearchDateRange, '/search/daterange/<string:name>')
 
 if __name__ == '__main__':
     app.run(debug=True)

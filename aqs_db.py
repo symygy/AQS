@@ -45,6 +45,6 @@ def find_docs_by_id(obj_id: str):
     return list(aqs_db.AQS.find({"_id": ObjectId(obj_id)}))
 
 
-def find_docs_by_date_range(start_date: str, end_date: str):
-    return list(aqs_db.AQS.find({"info.date": {"$gt": f'{start_date}', "$lt": f'{end_date}'}}))
+def find_docs_by_date_range(start_date: str, end_date: str, name: str):
+    return list(aqs_db.AQS.find({"info.date": {"$gt": f'{start_date}', "$lt": f'{end_date}'}, 'info.name':f'{name}'}))
 
