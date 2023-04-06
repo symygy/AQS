@@ -2,7 +2,7 @@ from dotenv import load_dotenv, find_dotenv
 from collections import defaultdict
 import requests
 import json
-from aqs_db import get_all_docs, find_docs_by_date, find_docs_by_name, insert_many_docs, find_docs_by_date_range
+from aqs_db import get_all_docs, find_docs_by_date, find_docs_by_name, insert_many_docs
 from datetime import date
 import os
 
@@ -114,18 +114,18 @@ def _extracted_from_get_stations_data(station, atmo_data, station_list):
 
 if __name__ == '__main__':
     AUTH_HEADER = set_auth_header()
-    #
-    # today_air_data = get_air_qual_info()
-    # save_resp_to_file(today_air_data)
-    #
-    # air_qual_data = read_resp_from_file()
-    #
-    # insert_many_docs(get_stations_data(air_qual_data))
+
+    today_air_data = get_air_qual_info()
+    save_resp_to_file(today_air_data)
+
+    air_qual_data = read_resp_from_file()
+
+    insert_many_docs(get_stations_data(air_qual_data))
 
     # print(get_all_docs())
 
     # print(get_docs_by_date('2023-04-02'))
     # print(find_docs_by_name('Allemagne-en-Provence'))
 
-    find_docs_by_date_range('2023-04-02', '2023-04-04')
+    # find_docs_by_date_range('2023-04-02', '2023-04-04')
 

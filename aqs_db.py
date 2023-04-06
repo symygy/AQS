@@ -16,6 +16,21 @@ aqs_db = client.AQS
 collections = aqs_db.list_collection_names()
 
 
+def build_search_query(args: dict):
+    query = {}
+
+    if args['startDate']:
+        query["$gte"] = args['startDate']
+
+    if args['endDate']:
+        query["$lte"] = args['endDate']
+
+    if not query:
+        query["$ne"] = ''
+
+    return query
+
+
 def insert_doc(document: dict):
     inserted_id = aqs_db.AQS.insert_one(document).inserted_id
     print(inserted_id)
@@ -34,17 +49,12 @@ def find_docs_by_date(date: str):
     return list(aqs_db.AQS.find({"info.date": f'{date}'}))
 
 
-def find_docs_by_name(name: str):
-    return list(aqs_db.AQS.find({"info.name": f'{name}'}))
+def find_docs_by_name(name: str, date_args: dict):
+    return list(aqs_db.AQS.find({"info.date": build_search_query(date_args), "info.name": f'{name}'}))
 
 
 def find_docs_by_id(obj_id: str):
-    if not ObjectId.is_valid(obj_id):
-        return []
-
-    return list(aqs_db.AQS.find({"_id": ObjectId(obj_id)}))
+    return list(aqs_db.AQS.find({"_id": ObjectId(obj_id)})) if ObjectId.is_valid(obj_id) else []
 
 
-def find_docs_by_date_range(start_date: str, end_date: str, name: str):
-    return list(aqs_db.AQS.find({"info.date": {"$gt": f'{start_date}', "$lt": f'{end_date}'}, 'info.name':f'{name}'}))
 

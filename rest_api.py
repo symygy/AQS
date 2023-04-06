@@ -3,7 +3,7 @@ from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import json
 from bson.json_util import dumps
 
-from AQS.aqs_db import find_docs_by_date, find_docs_by_name, find_docs_by_id, find_docs_by_date_range
+from AQS.aqs_db import find_docs_by_name, find_docs_by_id
 
 app = Flask(__name__)
 api = Api(app)
@@ -34,57 +34,40 @@ def abort_if_no_data_found(data: list):
     if not data:
         abort(404, ExceptionKey="No data found")
 
+
 # prawdopodobnie do usuniecia
 # def parse_data_from_mongo(data):
 #     return json.loads(dumps(data))
 
-query_args = reqparse.RequestParser()
-query_args.add_argument('start', type=str)
-query_args.add_argument('end', type=str)
 
-
-class AirQualitySearchDate(Resource):
-    @marshal_with(data_fields)
-    def get(self, value):
-        data = find_docs_by_date(value)
-        abort_if_no_data_found(data)
-        return data
+optional_args = reqparse.RequestParser()
+optional_args.add_argument('startDate', type=str, location='args')
+optional_args.add_argument('endDate', type=str, location='args')
 
 
 class AirQualitySearchName(Resource):
     @marshal_with(data_fields)
-    def get(self, name):
-        data = find_docs_by_name(name)
+    def get(self, station_name):
+        o_args = optional_args.parse_args()
+        data = find_docs_by_name(station_name, o_args)
         abort_if_no_data_found(data)
         return data
 
 
 class AirQualitySearchId(Resource):
     @marshal_with(data_fields)
-    def get(self, value):
-        data = find_docs_by_id(value)
+    def get(self, id_value):
+        data = find_docs_by_id(id_value)
         abort_if_no_data_found(data)
         return data
 
 
-class AirQualitySearchDateRange(Resource):
-    @marshal_with(data_fields)
-    #TODO jak przesylac przedzial daty?
-    def get(self, name):
-        args = query_args.parse_args()
-        data = find_docs_by_date_range(args['start'], args['end'], name)
-        abort_if_no_data_found(data)
-        return data
+api.add_resource(AirQualitySearchName, '/v1/stations/history/<string:station_name>')
+api.add_resource(AirQualitySearchId, '/v1/stations/<string:id_value>')
 
-
-api.add_resource(AirQualitySearchDate, '/search/date/<string:value>')
-api.add_resource(AirQualitySearchName, '/search/name/<string:name>')
-api.add_resource(AirQualitySearchId, '/search/id/<string:value>')
-api.add_resource(AirQualitySearchDateRange, '/search/daterange/<string:name>')
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 
 # return parse_data_from_mongo(find_docs_by_date('2023-04-02'))
 # 642944be4ad1ca6a305e25d0
