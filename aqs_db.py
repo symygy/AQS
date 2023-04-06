@@ -13,7 +13,11 @@ client = MongoClient(connection_str)
 dbs = client.list_database_names()
 
 aqs_db = client.AQS
-collections = aqs_db.list_collection_names()
+
+collections = {
+    'atmo': aqs_db.AQS,
+    'stations': aqs_db.stations
+}
 
 
 def build_search_query(args: dict):
@@ -36,13 +40,17 @@ def insert_doc(document: dict):
     print(inserted_id)
 
 
-def insert_many_docs(documents: list):
-    inserted_ids = aqs_db.AQS.insert_many(documents).inserted_ids
+def insert_many_docs(documents: list, col: str):
+    inserted_ids = collections[col].insert_many(documents).inserted_ids
     print(f"{len(inserted_ids)} documents were successfully inserted to DB")
 
 
+def update_docs():
+    pass
+
+
 def get_all_docs():
-    return list(aqs_db.AQS.find())
+    return len(list(aqs_db.AQS.find({"info.status": {"$ne": 0}})))
 
 
 def find_docs_by_date(date: str):

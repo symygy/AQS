@@ -89,15 +89,23 @@ def read_resp_from_file(filename: str = 'resp.json'):
         return json.loads(f.read())
 
 
-def get_stations_data(data: dict) -> list:
+def get_atmo_data(data: dict) -> list:
     station_list = []
     for station in data['features']:
         atmo_data = defaultdict(dict)
-        _extracted_from_get_stations_data(station, atmo_data, station_list)
+        _extracted_from_get_atmo_data(station, atmo_data, station_list)
     return station_list
 
 
-def _extracted_from_get_stations_data(station, atmo_data, station_list):
+def get_station_list(data: dict) -> list:
+    station_list = []
+    for station in data['features']:
+        station_data = defaultdict(dict)
+        _extracted_from_get_station_list(station, station_data, station_list)
+    return station_list
+
+
+def _extracted_from_get_atmo_data(station, atmo_data, station_list):
     atmo_data['info']['name'] = station['properties']['lib_zone']
     atmo_data['info']['latitude'] = station['properties']['y_wgs84']
     atmo_data['info']['longitude'] = station['properties']['x_wgs84']
@@ -112,15 +120,25 @@ def _extracted_from_get_stations_data(station, atmo_data, station_list):
     station_list.append(atmo_data)
 
 
+def _extracted_from_get_station_list(station, station_data, station_list):
+    station_data['name'] = station['properties']['lib_zone']
+    station_data['latitude'] = station['properties']['y_wgs84']
+    station_data['longitude'] = station['properties']['x_wgs84']
+    station_data['status'] = station['properties']['code_qual']
+
+    station_list.append(station_data)
+
+
 if __name__ == '__main__':
     AUTH_HEADER = set_auth_header()
 
-    today_air_data = get_air_qual_info()
-    save_resp_to_file(today_air_data)
-
+    # today_air_data = get_air_qual_info()
+    # save_resp_to_file(today_air_data)
+    #
     air_qual_data = read_resp_from_file()
 
-    insert_many_docs(get_stations_data(air_qual_data))
+    # insert_many_docs(get_atmo_data(air_qual_data), 'atmo')
+    insert_many_docs(get_station_list(air_qual_data), 'stations')
 
     # print(get_all_docs())
 
@@ -128,4 +146,3 @@ if __name__ == '__main__':
     # print(find_docs_by_name('Allemagne-en-Provence'))
 
     # find_docs_by_date_range('2023-04-02', '2023-04-04')
-
