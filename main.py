@@ -2,7 +2,7 @@ from dotenv import load_dotenv, find_dotenv
 from collections import defaultdict
 import requests
 import json
-from aqs_db import get_all_docs, find_docs_by_date, find_docs_by_name, insert_many_docs
+from aqs_db import get_all_docs, find_docs_by_date, find_docs_by_name, insert_many_docs, update_docs, drop_collection
 from datetime import date
 import os
 
@@ -91,42 +91,58 @@ def read_resp_from_file(filename: str = 'resp.json'):
 
 def get_atmo_data(data: dict) -> list:
     station_list = []
-    for station in data['features']:
+    for entry in data['features']:
         atmo_data = defaultdict(dict)
-        _extracted_from_get_atmo_data(station, atmo_data, station_list)
+        _extracted_from_get_atmo_data(entry, atmo_data, station_list)
     return station_list
 
 
 def get_station_list(data: dict) -> list:
     station_list = []
-    for station in data['features']:
+    for entry in data['features']:
         station_data = defaultdict(dict)
-        _extracted_from_get_station_list(station, station_data, station_list)
+        _extracted_from_get_station_list(entry, station_data, station_list)
+
     return station_list
 
 
-def _extracted_from_get_atmo_data(station, atmo_data, station_list):
-    atmo_data['info']['name'] = station['properties']['lib_zone']
-    atmo_data['info']['latitude'] = station['properties']['y_wgs84']
-    atmo_data['info']['longitude'] = station['properties']['x_wgs84']
-    atmo_data['info']['status'] = station['properties']['code_qual']
-    atmo_data['info']['date'] = station['properties']['date_ech']
-    atmo_data['atmo']['no2'] = station['properties']['code_no2']
-    atmo_data['atmo']['o3'] = station['properties']['code_o3']
-    atmo_data['atmo']['pm10'] = station['properties']['code_pm10']
-    atmo_data['atmo']['pm25'] = station['properties']['code_pm25']
-    atmo_data['atmo']['so2'] = station['properties']['code_so2']
+def _extracted_from_get_atmo_data(entry, atmo_data, station_list):
+    atmo_data['info']['name'] = entry['properties']['lib_zone']
+    atmo_data['info']['latitude'] = entry['properties']['y_wgs84']
+    atmo_data['info']['longitude'] = entry['properties']['x_wgs84']
+    atmo_data['info']['status'] = entry['properties']['code_qual']
+    atmo_data['info']['date'] = entry['properties']['date_ech']
+    atmo_data['atmo']['no2'] = entry['properties']['code_no2']
+    atmo_data['atmo']['o3'] = entry['properties']['code_o3']
+    atmo_data['atmo']['pm10'] = entry['properties']['code_pm10']
+    atmo_data['atmo']['pm25'] = entry['properties']['code_pm25']
+    atmo_data['atmo']['so2'] = entry['properties']['code_so2']
 
     station_list.append(atmo_data)
 
 
-def _extracted_from_get_station_list(station, station_data, station_list):
-    station_data['name'] = station['properties']['lib_zone']
-    station_data['latitude'] = station['properties']['y_wgs84']
-    station_data['longitude'] = station['properties']['x_wgs84']
-    station_data['status'] = station['properties']['code_qual']
+def _extracted_from_get_station_list(entry, station_data, station_list):
+    station_data['name'] = entry['properties']['lib_zone']
+    station_data['latitude'] = entry['properties']['y_wgs84']
+    station_data['longitude'] = entry['properties']['x_wgs84']
+    station_data['status'] = entry['properties']['code_qual']
 
     station_list.append(station_data)
+
+
+def update_stations_collection(station_list: list):
+    inserted_ids = insert_many_docs(station_list, 'stations')
+    print(f"{len(inserted_ids)} documents were successfully inserted to stations collection")
+
+
+def update_atmo_collection(atmo_data_list: list):
+    inserted_ids = insert_many_docs(atmo_data_list, 'atmo')
+    print(f"{len(inserted_ids)} documents were successfully inserted to AQS collection")
+
+
+def delete_stations_collection():
+    print('Collection stations will be dropped if exists')
+    return drop_collection('stations')
 
 
 if __name__ == '__main__':
@@ -134,15 +150,11 @@ if __name__ == '__main__':
 
     # today_air_data = get_air_qual_info()
     # save_resp_to_file(today_air_data)
-    #
+
     air_qual_data = read_resp_from_file()
 
-    # insert_many_docs(get_atmo_data(air_qual_data), 'atmo')
-    insert_many_docs(get_station_list(air_qual_data), 'stations')
+    # delete_stations_collection()
+    # update_stations_collection(get_station_list(air_qual_data))
 
-    # print(get_all_docs())
-
-    # print(get_docs_by_date('2023-04-02'))
-    # print(find_docs_by_name('Allemagne-en-Provence'))
-
-    # find_docs_by_date_range('2023-04-02', '2023-04-04')
+    update_atmo_collection(get_atmo_data(air_qual_data))
+    # update_stations_collection(get_station_list(air_qual_data))
