@@ -18,6 +18,7 @@ collections = {
     'atmo': aqs_db.AQS,
     'stations': aqs_db.stations,
     'exp': aqs_db.experimental,
+    'readings': aqs_db.readings
 }
 
 
@@ -66,10 +67,9 @@ def update_docs(docs: list):
     It can be replaced with function (drop_collection()) which will delete entire collection and create it again,
     but all tracking data (such as last station activity) won't be available.
     """
-    bulk_query = [UpdateOne({"name": doc['name']}, {"$set": doc}, upsert=True)for doc in docs]
+    bulk_query = [UpdateOne({"name": doc['name']}, {"$set": doc}, upsert=True) for doc in docs]
     aqs_db.stations.bulk_write(bulk_query)
 
 
 def drop_collection(coll: str) -> bool:
     return collections[coll].drop()
-

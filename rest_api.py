@@ -38,6 +38,7 @@ station_fields = {
     'status': fields.Integer,
 }
 
+
 def abort_if_no_data_found(data: list):
     if not data:
         abort(404, ExceptionKey="No data found")
@@ -77,10 +78,10 @@ class AirQualityStations(Resource):
         abort_if_no_data_found(data)
         return data
 
+
 api.add_resource(AirQualitySearchName, '/v1/stations/history/<string:station_name>')
 api.add_resource(AirQualitySearchId, '/v1/stations/<string:id_value>')
 api.add_resource(AirQualityStations, '/v1/stations/')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
