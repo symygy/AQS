@@ -131,6 +131,7 @@ def _extracted_from_get_station_list(entry, station_data, station_list):
 
 
 def update_stations_collection(station_list: list):
+    delete_stations_collection()
     inserted_ids = insert_many_docs(station_list, 'stations')
     print(f"{len(inserted_ids)} documents were successfully inserted to stations collection")
 
