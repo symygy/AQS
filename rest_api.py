@@ -85,6 +85,3 @@ api.add_resource(AirQualityStations, '/v1/stations/')
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-# return parse_data_from_mongo(find_docs_by_date('2023-04-02'))
-# 642944be4ad1ca6a305e25d0

@@ -1,6 +1,6 @@
 # ATMO HAUTS-DE-FRANCE
 # https://data-atmo-hdf.opendata.arcgis.com/datasets/atmo-hdf::mes-hdf-horaire-utd-poll-princ/explore?location=50.140867%2C2.776740%2C9.67
-
+import json
 import time
 from timeit import default_timer as timer
 from datetime import datetime, timedelta
@@ -16,6 +16,7 @@ DOWNLOAD_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/260a8f0eee5c4dc
 FILE_NAME = 'AQS.csv'
 COLLECTION = 'readings'
 DROP_NA_ROWS = True # defines if rows with empty values will be dropped or not
+RETRIES = 10
 
 
 def request_update_data():
@@ -27,10 +28,24 @@ def request_download_data():
     return requests.get(DOWNLOAD_DATA_URL)
 
 def download_data():
-    """ Dodać warunek ze jesli w odpowiedzi jest 202 ale coś tam quequed to czekam"""
-    if request_update_data().status_code == 202:
-        time.sleep(15)
-        return request_download_data()
+    retries = RETRIES
+    while retries:
+        r = request_update_data()
+        r_json = json.loads(r.content)
+
+        print(f"Attempting to download the data... Remaining attempts: {retries-1}")
+
+        if r.status_code != 202 or "job" in r_json["attributes"]:
+            time.sleep(10)
+            retries -= 1
+            continue
+        break
+
+    if not retries:
+        print(f"\nCouldn't download data in {RETRIES} attempts")
+        exit()
+
+    return request_download_data()
 
 def write_data_to_file():
     atmo_data = download_data()
@@ -60,8 +75,8 @@ def get_tomorrow_date():
 
 def prepare_data(received_data):
     df = received_data.drop(['X', 'Y', 'metrique', 'x_reg', 'y_reg', 'objectid', 'typologie', 'id_poll_ue', 'ObjectId2'], axis=1)
-    df_today = df.loc[(df['date_debut'] >= '2023/05/21') & (df['date_debut'] < '2023/05/22')]
-    # df_today = df.loc[(df['date_debut'] >= get_current_date()) & (df['date_debut'] < get_tomorrow_date())]
+    # df_today = df.loc[(df['date_debut'] >= '2023/05/19') & (df['date_debut'] < '2023/05/20')]
+    df_today = df.loc[(df['date_debut'] >= get_current_date()) & (df['date_debut'] < get_tomorrow_date())]
 
     if DROP_NA_ROWS:
         df_today = df_today.dropna(subset=['valeur'])
@@ -69,11 +84,14 @@ def prepare_data(received_data):
     return df_today.to_dict('records')
 
 def upload_to_db(received_data):
+    if not received_data:
+        print('\nNo data available for specified date')
+        exit()
     ids = insert_many_docs(received_data, COLLECTION)
     print(f'\n{len(ids)} records added to DataBase ("{COLLECTION}" collection)')
 
 
-drop_collection(COLLECTION) # to delete
+# drop_collection(COLLECTION) # to delete
 
 start = timer()
 

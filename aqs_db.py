@@ -53,8 +53,19 @@ def find_docs_by_date(date: str) -> list:
     return list(aqs_db.AQS.find({"info.date": f'{date}'}))
 
 
+# def find_docs_by_name(name: str, date_args: dict) -> list:
+#     # rest_api_v1
+#     return list(aqs_db.AQS.find({"info.date": build_search_query(date_args), "info.name": f'{name}'}))
+
+
 def find_docs_by_name(name: str, date_args: dict) -> list:
-    return list(aqs_db.AQS.find({"info.date": build_search_query(date_args), "info.name": f'{name}'}))
+    # rest_api_v2
+    return list(aqs_db.readings.find({"date_debut": build_search_query(date_args), "nom_station": f'{name}'}))
+
+
+def find_docs_by_area_code(area_code: int, date_args: dict) -> list:
+    # rest_api_v2
+    return list(aqs_db.readings.find({"date_debut": build_search_query(date_args), "insee_com": area_code}))
 
 
 def find_docs_by_id(obj_id: str) -> list:
