@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 from dotenv import load_dotenv, find_dotenv
 import os
-from pymongo import MongoClient, UpdateOne
+from pymongo import MongoClient, UpdateOne, GEO2D, GEOSPHERE
 
 load_dotenv(find_dotenv())
 password = os.environ.get('PASS')
@@ -84,3 +84,33 @@ def update_docs(docs: list):
 
 def drop_collection(coll: str) -> bool:
     return collections[coll].drop()
+
+
+def create_2d_index(coll: str):
+    return collections[coll].create_index([("location", GEO2D)])
+
+
+def create_2dsphere_index(coll: str):
+    return collections[coll].create_index([("location", GEOSPHERE)])
+
+
+def find_near_stations(coll: str, coord: list, min_dist: int = 100, max_dist: int = 10000):
+    """
+    :param coll: db collection name
+    :param coord: coordinates [long, lat] eg. [3.50804, 50.3585]
+    :param min_dist: in meters
+    :param max_dist: in meters
+    :return: list of stations, sorted in order from nearest to farthest
+    """
+
+    results = collections[coll].find({
+        "location": {
+            "$near": {
+                "$geometry": {"type": "Point", "coordinates": coord},
+                "$minDistance": min_dist,
+                "$maxDistance": max_dist
+                }
+            }
+        })
+
+    return list(results)
