@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 from dotenv import load_dotenv, find_dotenv
 import os
-from pymongo import MongoClient, UpdateOne, GEO2D, GEOSPHERE
+from pymongo import MongoClient, UpdateOne, GEO2D, GEOSPHERE, ASCENDING, DESCENDING
 
 load_dotenv(find_dotenv())
 password = os.environ.get('PASS')
@@ -63,6 +63,13 @@ def find_docs_by_name(name: str, date_args: dict) -> list:
     return list(aqs_db.readings.find({"date_debut": build_search_query(date_args), "nom_station": f'{name}'}))
 
 
+def find_coords_by_name(station_name: str) -> list:
+    # rest_api_v2
+    result = aqs_db.readings.find_one({"nom_station": f'{station_name}'})
+    if result is not None:
+        return result['location']
+
+
 def find_docs_by_area_code(area_code: int, date_args: dict) -> list:
     # rest_api_v2
     return list(aqs_db.readings.find({"date_debut": build_search_query(date_args), "insee_com": area_code}))
@@ -94,23 +101,42 @@ def create_2dsphere_index(coll: str):
     return collections[coll].create_index([("location", GEOSPHERE)])
 
 
-def find_near_stations(coll: str, coord: list, min_dist: int = 100, max_dist: int = 10000):
+def find_near_stations(coord: list, dist_args: dict):
     """
-    :param coll: db collection name
     :param coord: coordinates [long, lat] eg. [3.50804, 50.3585]
-    :param min_dist: in meters
-    :param max_dist: in meters
-    :return: list of stations, sorted in order from nearest to farthest
+    :param dist_args: provided min_dist and max_dist in query params
+    :return: list of readings - one document per pollutant with latest date
     """
 
-    results = collections[coll].find({
-        "location": {
-            "$near": {
-                "$geometry": {"type": "Point", "coordinates": coord},
-                "$minDistance": min_dist,
-                "$maxDistance": max_dist
-                }
+    results = aqs_db.readings.aggregate([
+        {
+            "$geoNear": {
+                "near": {"type": "Point", "coordinates": coord},
+                "key": "location",
+                "distanceField": "distance",
+                "minDistance": dist_args["minDist"],
+                "maxDistance": dist_args["maxDist"],
+                "spherical": True
             }
-        })
+        },
+        {
+            "$sort": {"date_debut": -1}
+        },
+        {
+            "$group": {
+                "_id": {"station": "$nom_station", "pollutant": "$nom_poll"},
+                "maxDocument": {"$first": "$$ROOT"}
+            }
+        },
+        {
+            "$replaceRoot": {
+                "newRoot": "$maxDocument"
+            }
+        },
+        {
+            "$sort": {"nom_station": 1}
+        },
+
+    ])
 
     return list(results)
