@@ -9,9 +9,16 @@ import requests
 import os
 from AQS.aqs_db import insert_many_docs, drop_collection, create_2d_index, create_2dsphere_index, find_near_stations
 
-UPDATE_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/260a8f0eee5c4dcba12070ee1a8cb4d5_0/downloads"
+# for region ATMO HAUTS-DE-FRANCE
+# UPDATE_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/260a8f0eee5c4dcba12070ee1a8cb4d5_0/downloads"
+# UPDATE_DATA_BODY = {"spatialRefId":"{\"wkid\":102100,\"latestWkid\":3857}","format":"csv","where":"1=1"}
+# DOWNLOAD_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/260a8f0eee5c4dcba12070ee1a8cb4d5_0/downloads/data?format=csv&spatialRefId=3857&where=1=1"
+
+
+# for region ATMO GRAND EST
+UPDATE_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/f9ab77ab400a4d799301c9fa16e30881_0/downloads"
 UPDATE_DATA_BODY = {"spatialRefId":"{\"wkid\":102100,\"latestWkid\":3857}","format":"csv","where":"1=1"}
-DOWNLOAD_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/260a8f0eee5c4dcba12070ee1a8cb4d5_0/downloads/data?format=csv&spatialRefId=3857&where=1=1"
+DOWNLOAD_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/f9ab77ab400a4d799301c9fa16e30881_0/downloads/data?format=csv&spatialRefId=3857&where=1%3D1"
 
 FILE_NAME = 'AQS.csv'
 COLLECTION = 'readings'
@@ -73,10 +80,26 @@ def get_current_date():
 def get_tomorrow_date():
     return (datetime.now() + timedelta(days=1)).strftime('%Y/%m/%d')
 
+# for region ATMO HAUTS-DE-FRANCE
+# def prepare_data(received_data):
+#     df = received_data
+#     df['location'] = df[['x_wgs84', 'y_wgs84']].values.tolist()
+#     df = df.drop(['X', 'Y', 'metrique', 'x_reg', 'y_reg', 'objectid', 'typologie', 'id_poll_ue', 'ObjectId2', 'y_wgs84', 'x_wgs84'], axis=1)
+#     # df_today = df.loc[(df['date_debut'] >= '2023/06/05') & (df['date_debut'] < '2023/06/06')]
+#     df_today = df.loc[(df['date_debut'] >= get_current_date()) & (df['date_debut'] < get_tomorrow_date())]
+#
+#     if DROP_NA_ROWS:
+#         df_today = df_today.dropna(subset=['valeur'])
+#
+#     return df_today.to_dict('records')
+
+
+# for region ATMO GRAND EST
 def prepare_data(received_data):
     df = received_data
-    df['location'] = df[['x_wgs84', 'y_wgs84']].values.tolist()
-    df = df.drop(['X', 'Y', 'metrique', 'x_reg', 'y_reg', 'objectid', 'typologie', 'id_poll_ue', 'ObjectId2', 'y_wgs84', 'x_wgs84'], axis=1)
+    df['location'] = df[['longitude', 'latitude']].values.tolist()
+    df = df.drop(['typologie', 'id_poll_ue', 'metrique', 'x', 'y', 'ObjectId', 'longitude', 'latitude'], axis=1)
+    df.rename(columns={'code_station_ue': 'code_station'}, inplace=True)
     # df_today = df.loc[(df['date_debut'] >= '2023/06/05') & (df['date_debut'] < '2023/06/06')]
     df_today = df.loc[(df['date_debut'] >= get_current_date()) & (df['date_debut'] < get_tomorrow_date())]
 
@@ -93,16 +116,16 @@ def upload_to_db(received_data):
     print(f'\n{len(ids)} records added to DataBase ("{COLLECTION}" collection)')
 
 
-# drop_collection(COLLECTION) # to delete
+drop_collection(COLLECTION) # to delete
 
 start = timer()
 
-# write_data_to_file()
+write_data_to_file()
 raw_data = read_data()
 data = prepare_data(raw_data)
 upload_to_db(data)
 
-# create_2dsphere_index(COLLECTION)
+create_2dsphere_index(COLLECTION)
 
 # print(len(find_near_stations(COLLECTION, [3.50804, 50.3585], 100, 1300)))
 

@@ -11,12 +11,12 @@ reading_fields = {
     'insee_com': fields.Integer,
     'nom_station': fields.String,
     'code_station': fields.String,
-    'influence': fields.Integer,
+    'influence': fields.String,
     'nom_poll': fields.String,
-    'valeur': fields.Integer,
-    'unite': fields.String,
     'date_debut': fields.String,
     'date_fin': fields.String,
+    'valeur': fields.Integer,
+    'unite': fields.String,
     'statut_valid': fields.String,
     'location': fields.List(fields.String),
 }
@@ -63,7 +63,6 @@ class AirQualitySearchInRange(Resource):
         r_args = range_args.parse_args()
         data = find_near_stations(station_coords, r_args)
         abort_if_no_data_found(data)
-        print(data)
         return data
 
 api.add_resource(AirQualitySearchName, '/v1/stations/history/<string:station_name>')
