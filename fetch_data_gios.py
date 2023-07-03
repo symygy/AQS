@@ -1,6 +1,7 @@
 from timeit import default_timer as timer
 import requests
 import json
+import itertools
 
 from AQS.aqs_db import insert_many_docs, drop_collection
 
@@ -41,7 +42,7 @@ def prepare_data_record(station_data, sensor_data, reading_data):
         "Jednostka": sensor_data["Wskaźnik - wzór"],
         "Data odczytu": reading_data["Data"],
         "Odczyt": reading_data["Wartość"],
-        "Lokalizacja": [station_data["WGS84 φ N"], station_data["WGS84 λ E"]]
+        "Lokalizacja": [station_data["WGS84 λ E"], station_data["WGS84 φ N"]]
     }
 
 def upload_to_db(received_data):
@@ -53,29 +54,30 @@ def upload_to_db(received_data):
 
 
 
+if __name__=='__main__':
 
-drop_collection(COLLECTION)
+    drop_collection(COLLECTION)
 
-start = timer()
-stations = get_stations()
-complete_data = []
+    start = timer()
+    stations = get_stations()
+    complete_data = []
 
-for station in stations:
-    sensors = get_sensors(station['Identyfikator stacji'])
+    for station in stations:
+        sensors = get_sensors(station['Identyfikator stacji'])
 
-    for sensor in sensors:
-        readings = get_data(sensor['Identyfikator stanowiska'])
+        for sensor in sensors:
+            readings = get_data(sensor['Identyfikator stanowiska'])
 
-        if readings is None:
-            continue
+            if readings is None:
+                continue
 
-        complete_data.extend(
-            prepare_data_record(station, sensor, reading)
-            for reading in readings
-            if reading['Wartość'] is not None
-        )
+            complete_data.extend(prepare_data_record(station, sensor, reading)for reading in readings if reading['Wartość'] is not None)
 
-upload_to_db(complete_data)
+    upload_to_db(complete_data)
 
-stop = timer()
-print(f'It took: {round((stop - start), 4)} seconds to complete')
+    stop = timer()
+    print(f'It took: {round((stop - start), 4)} seconds to complete')
+
+
+
+

@@ -43,7 +43,7 @@ def download_data():
         print(f"Attempting to download the data... Remaining attempts: {retries-1}")
 
         if r.status_code != 202 or "job" in r_json["attributes"]:
-            time.sleep(10)
+            time.sleep(30)
             retries -= 1
             continue
         break
@@ -116,7 +116,7 @@ def upload_to_db(received_data):
     print(f'\n{len(ids)} records added to DataBase ("{COLLECTION}" collection)')
 
 
-drop_collection(COLLECTION) # to delete
+# drop_collection(COLLECTION) # to delete
 
 start = timer()
 
@@ -125,7 +125,7 @@ raw_data = read_data()
 data = prepare_data(raw_data)
 upload_to_db(data)
 
-create_2dsphere_index(COLLECTION)
+# create_2dsphere_index(COLLECTION)
 
 # print(len(find_near_stations(COLLECTION, [3.50804, 50.3585], 100, 1300)))
 
