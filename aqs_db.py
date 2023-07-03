@@ -18,7 +18,8 @@ collections = {
     'atmo': aqs_db.AQS,
     'stations': aqs_db.stations,
     'exp': aqs_db.experimental,
-    'readings': aqs_db.readings
+    'readings': aqs_db.readings,
+    'gios': aqs_db.gios
 }
 
 
