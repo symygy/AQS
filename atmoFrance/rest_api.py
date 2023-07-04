@@ -1,9 +1,7 @@
-from flask import Flask, request
+from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
-import json
-from bson.json_util import dumps
 
-from AQS.aqs_db import find_docs_by_name, find_docs_by_id, get_all_docs
+from AQS.atmoFrance.aqs_db import find_docs_by_name, find_docs_by_id, get_all_docs
 
 app = Flask(__name__)
 api = Api(app)

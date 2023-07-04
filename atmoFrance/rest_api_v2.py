@@ -1,8 +1,7 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 
-from AQS.aqs_db import find_docs_by_name, find_docs_by_id, get_all_docs, find_docs_by_area_code, find_near_stations, \
-    find_coords_by_name, find_near_stations_v2
+from AQS.atmoFrance.aqs_db import find_docs_by_name, find_docs_by_area_code, find_coords_by_name, find_near_stations_v2
 
 reading_fields = {
     '_id': fields.String,

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import requests
 import os
-from AQS.aqs_db import insert_many_docs, drop_collection, create_2d_index, create_2dsphere_index, find_near_stations
+from AQS.atmoFrance.aqs_db import insert_many_docs
 
 # for region ATMO HAUTS-DE-FRANCE
 # UPDATE_DATA_URL = "https://opendata.arcgis.com/api/v3/datasets/260a8f0eee5c4dcba12070ee1a8cb4d5_0/downloads"

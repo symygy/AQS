@@ -1,13 +1,10 @@
 from timeit import default_timer as timer
 import requests
 import json
-import itertools
+from AQS.gios.aqs_db import insert_many_docs, drop_collection, create_2dsphere_index
 
-from AQS.aqs_db import insert_many_docs, drop_collection, create_2dsphere_index
-
-FILE_NAME = 'gios_all_stations.csv'
+FILE_NAME = '../gios_all_stations.csv'
 COLLECTION = 'gios'
-
 
 def get_stations():
     r = requests.get('https://api.gios.gov.pl/pjp-api/v1/rest/station/findAll')
@@ -27,11 +24,6 @@ def get_data(sensor_id):
         return json.loads(r.content)["Lista danych pomiarowych"]
 
 
-def write_data_to_file(data):
-    print(f'Writing data to file: {FILE_NAME}...')
-    with open(FILE_NAME, 'wb') as csv_file:
-        csv_file.write(data)
-
 def prepare_data_record(station_data, sensor_data, reading_data):
     return {
         "identyfikator_stacji": station_data["Identyfikator stacji"],
@@ -48,16 +40,18 @@ def prepare_data_record(station_data, sensor_data, reading_data):
 def upload_to_db(received_data):
     if not received_data:
         exit()
-    ids = insert_many_docs(received_data, COLLECTION)
+    ids = insert_many_docs(received_data)
     print(f'\n{len(ids)} records added to DataBase ("{COLLECTION}" collection)')
 
 
 
 if __name__=='__main__':
 
-    drop_collection(COLLECTION)
+    drop_collection()
 
     start = timer()
+
+    print("Fetching atmo data...")
     stations = get_stations()
     complete_data = []
 
@@ -72,9 +66,10 @@ if __name__=='__main__':
 
             complete_data.extend(prepare_data_record(station, sensor, reading)for reading in readings if reading['Wartość'] is not None)
 
+    print("Uploading data to db...")
     upload_to_db(complete_data)
 
-    create_2dsphere_index(COLLECTION)
+    create_2dsphere_index()
 
     stop = timer()
     print(f'It took: {round((stop - start), 4)} seconds to complete')
