@@ -4,15 +4,15 @@ from AQS.gios.aqs_db import find_docs_by_code, find_docs_by_station_id, find_coo
 
 data_fields = {
     '_id': fields.String,
-    'identyfikator_stacji': fields.Integer,
-    'kod_stacji': fields.String,
-    'nazwa_stacji': fields.String,
-    'identyfikator_stanowiska': fields.Integer,
-    'wskaznik': fields.String,
-    'wskaznik_kod': fields.String,
-    'data_odczytu': fields.String,
-    'odczyt': fields.Float,
-    'lokalizacja': fields.List(fields.String),
+    'station_id': fields.Integer,
+    'station_code': fields.String,
+    'station_name': fields.String,
+    'sensor_id': fields.Integer,
+    'pollutant': fields.String,
+    'pollutant_symbol': fields.String,
+    'measurement_date': fields.String,
+    'measurement_value': fields.Float,
+    'location': fields.List(fields.String),
 }
 
 app = Flask(__name__)

@@ -30,15 +30,15 @@ def get_data(sensor_id):
 def prepare_data_record(station_data, sensor_data, reading_data):
     """ Returns single data record """
     return {
-        "identyfikator_stacji": station_data["Identyfikator stacji"],
-        "kod_stacji": station_data["Kod stacji"],
-        "nazwa_stacji": station_data["Nazwa stacji"],
-        "identyfikator_stanowiska": sensor_data["Identyfikator stanowiska"],
-        "wskaznik": sensor_data["Wskaźnik"],
-        "wskaznik_kod": sensor_data["Wskaźnik - wzór"],
-        "data_odczytu": reading_data["Data"],
-        "odczyt": reading_data["Wartość"],
-        "lokalizacja": [float(station_data["WGS84 λ E"]), float(station_data["WGS84 φ N"])]
+        "station_id": station_data["Identyfikator stacji"],
+        "station_code": station_data["Kod stacji"],
+        "station_name": station_data["Nazwa stacji"],
+        "sensor_id": sensor_data["Identyfikator stanowiska"],
+        "pollutant": sensor_data["Wskaźnik"],
+        "pollutant_symbol": sensor_data["Wskaźnik - wzór"],
+        "measurement_date": reading_data["Data"],
+        "measurement_value": reading_data["Wartość"],
+        "location": [float(station_data["WGS84 λ E"]), float(station_data["WGS84 φ N"])]
     }
 
 def upload_to_db(received_data):

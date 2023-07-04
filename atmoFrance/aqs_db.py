@@ -76,7 +76,7 @@ def find_docs_by_code(code: str, date_args: dict) -> list:
 
 def find_docs_by_station_id(id: int, date_args: dict) -> list:
     # rest_api_v3
-    return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "identyfikator_stacji": id}))
+    return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "station_id": id}))
 
 
 def find_coords_by_name(station_name: str) -> list:
