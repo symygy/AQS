@@ -7,24 +7,28 @@ FILE_NAME = '../gios_all_stations.csv'
 COLLECTION = 'gios'
 
 def get_stations():
+    """ Returns all atmo stations from GIOŚ """
     r = requests.get('https://api.gios.gov.pl/pjp-api/v1/rest/station/findAll')
     if r.status_code == 200:
         return json.loads(r.content)["Lista stacji pomiarowych"]
 
 
 def get_sensors(station_id):
+    """ Returns all sensors related to station """
     r = requests.get(f'https://api.gios.gov.pl/pjp-api/v1/rest/station/sensors/{station_id}')
     if r.status_code == 200:
         return json.loads(r.content)["Lista stanowisk pomiarowych dla podanej stacji"]
 
 
 def get_data(sensor_id):
+    """ Returns sensors related data"""
     r = requests.get(f'https://api.gios.gov.pl/pjp-api/v1/rest/data/getData/{sensor_id}')
     if r.status_code == 200:
         return json.loads(r.content)["Lista danych pomiarowych"]
 
 
 def prepare_data_record(station_data, sensor_data, reading_data):
+    """ Returns single data record """
     return {
         "identyfikator_stacji": station_data["Identyfikator stacji"],
         "kod_stacji": station_data["Kod stacji"],
@@ -38,6 +42,7 @@ def prepare_data_record(station_data, sensor_data, reading_data):
     }
 
 def upload_to_db(received_data):
+    """ Uploads list of data records to db """
     if not received_data:
         exit()
     ids = insert_many_docs(received_data)

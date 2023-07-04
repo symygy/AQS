@@ -15,6 +15,8 @@ aqs_db = client.AQS
 
 
 def build_search_query(args: dict) -> dict:
+    """ Returns query used for searching documents by date"""
+
     query = {}
 
     if args['startDate']:
@@ -30,40 +32,44 @@ def build_search_query(args: dict) -> dict:
 
 
 def insert_many_docs(documents: list) -> list:
+    """ Iserts many documents into collection and returns all inserted records ID"""
     return aqs_db.gios.insert_many(documents).inserted_ids
 
 
 def get_all_docs() -> list:
+    """ Returns all records from gios collection """
     return list(aqs_db.gios.find())
 
 
 def find_docs_by_name(name: str, date_args: dict) -> list:
+    """ Returns station found by station name """
     return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "nazwa_stacji": f'{name}'}))
 
 
 def find_docs_by_code(code: str, date_args: dict) -> list:
+    """ Returns station found by station code """
     return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "kod_stacji": f'{code}'}))
 
 
 def find_docs_by_station_id(id: int, date_args: dict) -> list:
+    """ Returns station found by ID """
     return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "identyfikator_stacji": id}))
 
 
 def find_coords_by_code(station_code: str) -> list:
+    """ Returns station coordinates by station_code """
     result = aqs_db.gios.find_one({"kod_stacji": f'{station_code}'})
     if result is not None:
         return result['lokalizacja']
 
 
 def drop_collection() -> bool:
+    """ Drops 'gios' collection """
     return aqs_db.gios.drop()
 
 
-def create_2d_index():
-    return aqs_db.gios.create_index([("location", GEO2D)])
-
-
 def create_2dsphere_index():
+    """ Creates 2dsphere index """
     return aqs_db.gios.create_index([("lokalizacja", GEOSPHERE)])
 
 
