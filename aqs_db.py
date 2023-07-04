@@ -66,7 +66,17 @@ def find_docs_by_date(date: str) -> list:
 
 def find_docs_by_name(name: str, date_args: dict) -> list:
     # rest_api_v3
-    return list(aqs_db.gios.find({"Data odczytu": build_search_query(date_args), "Nazwa stacji": f'{name}'}))
+    return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "Nazwa stacji": f'{name}'}))
+
+
+def find_docs_by_code(code: str, date_args: dict) -> list:
+    # rest_api_v3
+    return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "kod_stacji": f'{code}'}))
+
+
+def find_docs_by_station_id(id: int, date_args: dict) -> list:
+    # rest_api_v3
+    return list(aqs_db.gios.find({"data_odczytu": build_search_query(date_args), "identyfikator_stacji": id}))
 
 
 def find_coords_by_name(station_name: str) -> list:
@@ -74,6 +84,12 @@ def find_coords_by_name(station_name: str) -> list:
     result = aqs_db.readings.find_one({"nom_station": f'{station_name}'})
     if result is not None:
         return result['location']
+
+def find_coords_by_code(station_code: str) -> list:
+    # rest_api_v3
+    result = aqs_db.gios.find_one({"kod_stacji": f'{station_code}'})
+    if result is not None:
+        return result['lokalizacja']
 
 
 def find_docs_by_area_code(area_code: int, date_args: dict) -> list:
@@ -104,11 +120,12 @@ def create_2d_index(coll: str):
 
 
 def create_2dsphere_index(coll: str):
-    return collections[coll].create_index([("location", GEOSPHERE)])
+    return collections[coll].create_index([("lokalizacja", GEOSPHERE)])
 
 
-def find_near_stations(coord: list, dist_args: dict):
+def find_near_stations_v2(coord: list, dist_args: dict):
     """
+    rest_api_v2
     :param coord: coordinates [long, lat] eg. [3.50804, 50.3585]
     :param dist_args: provided min_dist and max_dist in query params
     :return: list of readings - one document per pollutant with latest date
@@ -143,6 +160,45 @@ def find_near_stations(coord: list, dist_args: dict):
             "$sort": {"nom_station": 1}
         },
 
+    ])
+    return list(results)
+
+def find_near_stations(coord: list, dist_args: dict):
+    """
+    rest_api_v3
+    :param coord: coordinates [long, lat] eg. [3.50804, 50.3585]
+    :param dist_args: provided min_dist and max_dist in query params
+    :return: list of readings - one document per pollutant with latest date
+    """
+
+    results = aqs_db.gios.aggregate([
+        {
+            "$geoNear": {
+                "near": {"type": "Point", "coordinates": coord},
+                "key": "lokalizacja",
+                "distanceField": "distance",
+                "minDistance": dist_args["minDist"],
+                "maxDistance": dist_args["maxDist"],
+                "spherical": True
+            }
+        },
+        {
+            "$sort": {"data_odczytu": -1}
+        },
+        {
+            "$group": {
+                "_id": {"station": "$kod_stacji", "pollutant": "$wskaznik_kod"},
+                "maxDocument": {"$first": "$$ROOT"}
+            }
+        },
+        {
+            "$replaceRoot": {
+                "newRoot": "$maxDocument"
+            }
+        },
+        {
+            "$sort": {"kod_stacji": 1}
+        },
     ])
 
     return list(results)

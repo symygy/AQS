@@ -2,19 +2,19 @@ from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 
 from AQS.aqs_db import find_docs_by_name, find_docs_by_id, get_all_docs, find_docs_by_area_code, find_near_stations, \
-    find_coords_by_name
+    find_coords_by_name, find_docs_by_station_id, find_docs_by_code, find_coords_by_code
 
 data_fields = {
     '_id': fields.String,
-    'Identyfikator stacji': fields.Integer,
-    'Kod stacji': fields.String,
-    'Nazwa stacji': fields.String,
-    'Identyfikator stanowiska': fields.Integer,
-    'Wskaźnik': fields.String,
-    'Jednostka': fields.String,
-    'Data odczytu': fields.String,
-    'Odczyt': fields.Float,
-    'Lokalizacja': fields.List(fields.String),
+    'identyfikator_stacji': fields.Integer,
+    'kod_stacji': fields.String,
+    'nazwa_stacji': fields.String,
+    'identyfikator_stanowiska': fields.Integer,
+    'wskaznik': fields.String,
+    'wskaznik_kod': fields.String,
+    'data_odczytu': fields.String,
+    'odczyt': fields.Float,
+    'lokalizacja': fields.List(fields.String),
 }
 
 app = Flask(__name__)
@@ -28,24 +28,41 @@ date_args = reqparse.RequestParser()
 date_args.add_argument('startDate', type=str, location='args')
 date_args.add_argument('endDate', type=str, location='args')
 
-class AirQualitySearchName(Resource):
+range_args = reqparse.RequestParser()
+range_args.add_argument('minDist', type=int, location='args', required = True, help='Providing minDist in meters is required')
+range_args.add_argument('maxDist', type=int, location='args', required = True, help='Providing maxDist in meters is required')
+
+class AirQualitySearchCode(Resource):
     @marshal_with(data_fields)
-    def get(self, station_name):
+    def get(self, station_code):
         o_args = date_args.parse_args()
-        data = find_docs_by_name(station_name, o_args)
+        data = find_docs_by_code(station_code, o_args)
         abort_if_no_data_found(data)
         return data
 
-# class AirQualitySearchCode(Resource):
-#     @marshal_with(data_fields)
-#     def get(self, station_code):
-#         o_args = date_args.parse_args()
-#         data = find_docs_by_name(station_code, o_args)
-#         abort_if_no_data_found(data)
-#         return data
+class AirQualitySearchId(Resource):
+    @marshal_with(data_fields)
+    def get(self, station_id):
+        o_args = date_args.parse_args()
+        data = find_docs_by_station_id(station_id, o_args)
+        abort_if_no_data_found(data)
+        return data
 
-api.add_resource(AirQualitySearchName, '/v1/stations/name/<string:station_name>')
-# api.add_resource(AirQualitySearchCode, '/v1/stations/name/<string:station_code>')
+class AirQualitySearchInRange(Resource):
+    @marshal_with(data_fields)
+    def get(self, station_code):
+        station_coords = find_coords_by_code(station_code)
+        abort_if_no_data_found(station_coords)
+        print(station_coords)
+
+        r_args = range_args.parse_args()
+        data = find_near_stations(station_coords, r_args)
+        abort_if_no_data_found(data)
+        return data
+
+api.add_resource(AirQualitySearchCode, '/v1/stations/code/<string:station_code>')
+api.add_resource(AirQualitySearchId, '/v1/stations/id/<int:station_id>')
+api.add_resource(AirQualitySearchInRange, '/v1/stations/range/<string:station_code>/')
 
 if __name__ == '__main__':
     app.run(debug=True)

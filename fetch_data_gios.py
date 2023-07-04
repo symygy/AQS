@@ -3,7 +3,7 @@ import requests
 import json
 import itertools
 
-from AQS.aqs_db import insert_many_docs, drop_collection
+from AQS.aqs_db import insert_many_docs, drop_collection, create_2dsphere_index
 
 FILE_NAME = 'gios_all_stations.csv'
 COLLECTION = 'gios'
@@ -34,20 +34,19 @@ def write_data_to_file(data):
 
 def prepare_data_record(station_data, sensor_data, reading_data):
     return {
-        "Identyfikator stacji": station_data["Identyfikator stacji"],
-        "Kod stacji": station_data["Kod stacji"],
-        "Nazwa stacji": station_data["Nazwa stacji"],
-        "Identyfikator stanowiska": sensor_data["Identyfikator stanowiska"],
-        "Wskaźnik": sensor_data["Wskaźnik"],
-        "Jednostka": sensor_data["Wskaźnik - wzór"],
-        "Data odczytu": reading_data["Data"],
-        "Odczyt": reading_data["Wartość"],
-        "Lokalizacja": [station_data["WGS84 λ E"], station_data["WGS84 φ N"]]
+        "identyfikator_stacji": station_data["Identyfikator stacji"],
+        "kod_stacji": station_data["Kod stacji"],
+        "nazwa_stacji": station_data["Nazwa stacji"],
+        "identyfikator_stanowiska": sensor_data["Identyfikator stanowiska"],
+        "wskaznik": sensor_data["Wskaźnik"],
+        "wskaznik_kod": sensor_data["Wskaźnik - wzór"],
+        "data_odczytu": reading_data["Data"],
+        "odczyt": reading_data["Wartość"],
+        "lokalizacja": [float(station_data["WGS84 λ E"]), float(station_data["WGS84 φ N"])]
     }
 
 def upload_to_db(received_data):
     if not received_data:
-        print('\nNo data available for specified date')
         exit()
     ids = insert_many_docs(received_data, COLLECTION)
     print(f'\n{len(ids)} records added to DataBase ("{COLLECTION}" collection)')
@@ -74,6 +73,8 @@ if __name__=='__main__':
             complete_data.extend(prepare_data_record(station, sensor, reading)for reading in readings if reading['Wartość'] is not None)
 
     upload_to_db(complete_data)
+
+    create_2dsphere_index(COLLECTION)
 
     stop = timer()
     print(f'It took: {round((stop - start), 4)} seconds to complete')
