@@ -52,7 +52,7 @@ def upload_to_db(received_data):
 
 if __name__=='__main__':
 
-    drop_collection()
+    # drop_collection()
 
     start = timer()
 
@@ -69,7 +69,7 @@ if __name__=='__main__':
             if readings is None:
                 continue
 
-            complete_data.extend(prepare_data_record(station, sensor, reading)for reading in readings if reading['Wartość'] is not None)
+            complete_data.extend(prepare_data_record(station, sensor, reading) for reading in readings if reading['Wartość'] is not None)
 
     print("Uploading data to db...")
     upload_to_db(complete_data)
