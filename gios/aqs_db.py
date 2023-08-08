@@ -13,6 +13,11 @@ dbs = client.list_database_names()
 
 aqs_db = client.AQS
 
+collections = {
+    'gios': aqs_db.gios,
+    'gios_stations': aqs_db.gios_stations
+}
+
 
 def build_search_query(args: dict) -> dict:
     """ Returns query used for searching documents by date"""
@@ -31,14 +36,18 @@ def build_search_query(args: dict) -> dict:
     return query
 
 
-def insert_many_docs(documents: list) -> list:
+def insert_many_docs(documents: list, col_name: str) -> list:
     """ Inserts many documents into collection and returns all inserted records ID"""
-    return aqs_db.gios.insert_many(documents).inserted_ids
+    return collections[col_name].insert_many(documents).inserted_ids
 
 
 def get_all_docs() -> list:
     """ Returns all records from gios collection """
     return list(aqs_db.gios.find())
+
+
+def get_all_stations() ->list:
+    return list(aqs_db.gios_stations.find())
 
 
 def find_docs_by_name(name: str, date_args: dict) -> list:
@@ -63,9 +72,9 @@ def find_coords_by_code(station_code: str) -> list:
         return result['location']
 
 
-def drop_collection() -> bool:
+def drop_collection(col_name: str) -> bool:
     """ Drops 'gios' collection """
-    return aqs_db.gios.drop()
+    return collections[col_name].drop()
 
 
 def create_2dsphere_index():

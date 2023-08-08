@@ -4,11 +4,13 @@ import json
 from AQS.gios.aqs_db import insert_many_docs, drop_collection, create_2dsphere_index
 
 FILE_NAME = '../gios_all_stations.csv'
-COLLECTION = 'gios'
+MAIN_COLLECTION = 'gios'
+STATIONS_COLLECTION = 'gios_stations'
 
 def get_stations():
     """ Returns all atmo stations from GIOŚ """
-    r = requests.get('https://api.gios.gov.pl/pjp-api/v1/rest/station/findAll')
+    r = requests.get('https://api.gios.gov.pl/pjp-api/v1/rest/station/findAll?size=500')
+
     if r.status_code == 200:
         return json.loads(r.content)["Lista stacji pomiarowych"]
 
@@ -41,26 +43,53 @@ def prepare_data_record(station_data, sensor_data, reading_data):
         "location": [float(station_data["WGS84 λ E"]), float(station_data["WGS84 φ N"])]
     }
 
-def upload_to_db(received_data):
+def prepare_station_record(station_data):
+    """ Returns single station record """
+    return {
+        "station_id": station_data["Identyfikator stacji"],
+        "station_code": station_data["Kod stacji"],
+        "station_name": station_data["Nazwa stacji"],
+        "city_id": station_data["Identyfikator miasta"],
+        "city": station_data["Nazwa miasta"],
+        "community": station_data["Gmina"],
+        "county": station_data["Powiat"],
+        "voivodeship": station_data["Województwo"],
+        "street": station_data["Ulica"],
+        "location": [float(station_data["WGS84 λ E"]), float(station_data["WGS84 φ N"])]
+    }
+
+def upload_readings_to_db(received_data):
     """ Uploads list of data records to db """
     if not received_data:
         exit()
-    ids = insert_many_docs(received_data)
-    print(f'\n{len(ids)} records added to DataBase ("{COLLECTION}" collection)')
+    ids = insert_many_docs(received_data, MAIN_COLLECTION)
+    print(f'\n{len(ids)} records added to DataBase ("{MAIN_COLLECTION}" collection)')
+
+def upload_stations_to_db(received_data):
+    """ Uploads list of stations records to db """
+    if not received_data:
+        exit()
+
+    ids = insert_many_docs(received_data, STATIONS_COLLECTION)
+    print(f'\n{len(ids)} records added to DataBase ("{STATIONS_COLLECTION}" collection)')
+
 
 
 
 if __name__=='__main__':
 
-    # drop_collection()
+    drop_collection(STATIONS_COLLECTION)
 
     start = timer()
 
     print("Fetching atmo data...")
     stations = get_stations()
     complete_data = []
+    stations_data = []
 
-    for station in stations:
+    for i, station in enumerate(stations):
+        print(f'Fetching station: {i}/{len(stations)}')
+        stations_data.append(prepare_station_record(station))
         sensors = get_sensors(station['Identyfikator stacji'])
 
         for sensor in sensors:
@@ -72,12 +101,13 @@ if __name__=='__main__':
             complete_data.extend(prepare_data_record(station, sensor, reading) for reading in readings if reading['Wartość'] is not None)
 
     print("Uploading data to db...")
-    upload_to_db(complete_data)
+    upload_readings_to_db(complete_data)
+    upload_stations_to_db(stations_data)
 
     create_2dsphere_index()
 
     stop = timer()
-    print(f'It took: {round((stop - start), 4)} seconds to complete')
+    print(f'\nIt took: {round((stop - start), 4)} seconds to complete')
 
 
 
