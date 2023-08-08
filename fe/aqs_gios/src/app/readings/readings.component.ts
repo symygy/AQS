@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { GiosApiService } from '../gios-api.service';
 import { MatTableDataSource } from '@angular/material/table';
@@ -11,7 +11,7 @@ import { ReadingGios } from '../models';
   templateUrl: './readings.component.html',
   styleUrls: ['./readings.component.scss']
 })
-export class ReadingsComponent implements AfterViewInit {
+export class ReadingsComponent {
   dataSource: any;
   readings: ReadingGios[] = []
   columns: string[] = ['sensor_id', 'pollutant', 'pollutant_symbol','measurement_date', 'measurement_value'];
@@ -25,11 +25,6 @@ export class ReadingsComponent implements AfterViewInit {
         this.getReadings(params['stationCode'])
       }
     })
-
-
-  }
-  ngAfterViewInit(): void {
-    this.getReadings()
   }
 
   applyFilter(event: Event) {
@@ -54,6 +49,5 @@ export class ReadingsComponent implements AfterViewInit {
     }
     return this.pollutants
   }
-
 
 }
