@@ -1,0 +1,89 @@
+<button (click)="getData('123')">TEST</button>
+<div>  
+  <div class="station-table">
+    <mat-form-field>
+      <mat-label>Filter</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Enter phrase" #input>
+    </mat-form-field>
+  
+    <div class="mat-elevation-z8">
+      <table mat-table [dataSource]="dataSource" matSort>
+    
+        <ng-container matColumnDef="station_id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Station ID </th>
+          <td mat-cell *matCellDef="let station"> {{station.station_id}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="station_code">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Station code </th>
+          <td mat-cell *matCellDef="let station">{{station.station_code}}</td>
+        </ng-container>
+    
+        <ng-container matColumnDef="station_name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Station name </th>
+          <td mat-cell *matCellDef="let station"> {{station.station_name}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="city_id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> City ID </th>
+          <td mat-cell *matCellDef="let station"> {{station.city_id}} </td>
+        </ng-container>
+  
+        <ng-container matColumnDef="city">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> City </th>
+          <td mat-cell *matCellDef="let station"> {{station.city}} </td>
+        </ng-container>
+  
+        <ng-container matColumnDef="street">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Street </th>
+          <td mat-cell *matCellDef="let station"> {{station.street}} </td>
+        </ng-container>
+  
+        <ng-container matColumnDef="voivodeship">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Voivodeship </th>
+          <td mat-cell *matCellDef="let station"> {{station.voivodeship}} </td>
+        </ng-container>
+  
+        <ng-container matColumnDef="location">
+          <th mat-header-cell *matHeaderCellDef> Location </th>
+          <td mat-cell *matCellDef="let station"> 
+            <mat-icon type="button" (click)="showLocation(station.location)" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">location_on</mat-icon>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="data">
+          <th mat-header-cell *matHeaderCellDef> Data </th>
+          <td mat-cell *matCellDef="let station"> 
+            <button type="button"(click)="getData(station.station_code)" class="btn btn-info btn-sm">data</button>
+          </td>
+        </ng-container>
+
+    
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let station; columns: columns;"></tr>
+    
+        <!-- Row shown when there is no matching data. -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
+        </tr>
+      </table>
+    
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+          <iframe [src]="URL | safe" height="450" width="760"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+

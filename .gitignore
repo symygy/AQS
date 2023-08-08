@@ -130,3 +130,6 @@ dmypy.json
 
 atmoFrance/resp.json
 *.csv
+/fe/node_modules/
+/fe/aqs_gios/.angular/
+/fe/aqs_gios/.vscode/
