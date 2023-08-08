@@ -86,24 +86,20 @@ if __name__=='__main__':
     stations = get_stations()
     complete_data = []
     stations_data = []
-    readings_available = True
 
     for i, station in enumerate(stations):
-        readings_available = True
         print(f'Fetching station: {i+1}/{len(stations)}')
         sensors = get_sensors(station['Identyfikator stacji'])
+        stations_data.append(prepare_station_record(station))
 
         for sensor in sensors:
             readings = get_data(sensor['Identyfikator stanowiska'])
 
             if readings is None:
-                readings_available = False
                 continue
 
             complete_data.extend(prepare_data_record(station, sensor, reading) for reading in readings if reading['Wartość'] is not None)
 
-        if readings_available:
-            stations_data.append(prepare_station_record(station))
 
     print("Uploading data to db...")
     upload_readings_to_db(complete_data)

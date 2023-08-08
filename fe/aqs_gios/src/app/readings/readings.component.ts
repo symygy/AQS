@@ -17,6 +17,7 @@ export class ReadingsComponent {
   columns: string[] = ['sensor_id', 'pollutant', 'pollutant_symbol','measurement_date', 'measurement_value'];
   @ViewChild(MatSort) sort!: MatSort;
   pollutants: string[] = []
+  selectedPollutants: string[] = []
 
 
   constructor(private APIService: GiosApiService, private route: ActivatedRoute) {
@@ -38,6 +39,7 @@ export class ReadingsComponent {
         this.readings = readings
         this.dataSource = new MatTableDataSource(readings)
         this.dataSource.sort = this.sort;
+        this.selectedPollutants = Object.assign([], this.pollutants);
     })
   }
 
@@ -47,7 +49,17 @@ export class ReadingsComponent {
         this.pollutants.push(String(reading.pollutant))
       }
     }
+
     return this.pollutants
+  }
+
+  selectPoll(selectedPoll: string) {
+    
+    if (this.selectedPollutants.includes(selectedPoll)) {
+      this.selectedPollutants.splice(this.selectedPollutants.indexOf(selectedPoll, 0), 1)
+    } else {
+      this.selectedPollutants.push(selectedPoll)
+    }
   }
 
 }
