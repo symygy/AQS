@@ -8,16 +8,15 @@
 
 <div class="card info">
     <div class="card-body">
-        <div class="input-group info">
-            <div class="input-group-prepend">
-            <span class="input-group-text" id="">Range [meters]</span>
-            </div>
-            <input #minInput type="text" class="form-control" value="{{minDist}}">
-            <input #maxInput type="text" class="form-control" value="{{maxDist}}">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" (click)="search(minInput.value, maxInput.value)">Search</button>
-            </div>
+        <div>
+            <label for="minInput" class="form-label"> Minimal distance: {{getMinDist()}} </label>
+            <input type="range" class="form-range" min="0" max="100000" step="200" id="minInput" (input)="setMinDist($event)" value="{{minDist}}">
         </div>
+        <div style="margin-block: 15px;">
+            <label for="maxInput" class="form-label">Maximal distance: {{getMaxDist()}}</label>
+            <input type="range" class="form-range" min="0" max="100000" step="1000" id="maxInput" (input)="setMaxDist($event)" value="{{maxDist}}">
+        </div>
+        <button class="btn btn-outline-secondary" type="button" (click)="search()">Search</button>
     </div>
 </div>
 

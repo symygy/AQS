@@ -12,7 +12,7 @@ import { MatSort } from '@angular/material/sort';
 })
 export class RangeComponent {
   stationCode: string = ''
-  minDist: string = '100';
+  minDist: string = '200';
   maxDist: string = '1000';
   dataSource: any;
   readings: ReadingGios[] = []
@@ -47,16 +47,32 @@ export class RangeComponent {
   )
 }
 
-search(minValue: string, maxValue: string) {
-  this.minDist = minValue
-  this.maxDist = maxValue
-
+search() {
+  console.log(this.minDist, this.maxDist)
   this.getReadingsInRange(this.stationCode, this.minDist, this.maxDist)
 }
 
 applyFilter(event: Event) {
   const filterValue = (event.target as HTMLInputElement).value;
   this.dataSource.filter = filterValue.trim().toLowerCase();
+}
+
+setMinDist(e: any){
+  this.minDist = e.target.value
+}
+
+setMaxDist(e: any){
+  this.maxDist = e.target.value
+}
+
+getMinDist(){
+  if (Number(this.minDist) < 1000) return `${this.minDist} m`
+  else return `${Number(this.minDist)/1000} km`
+}
+
+getMaxDist(){
+  if (Number(this.maxDist) < 1000) return `${this.maxDist} m`
+  else return `${Number(this.maxDist)/1000} km`
 }
 
 }
