@@ -1,0 +1,88 @@
+<div class="card info">
+    <div class="card-body">
+      <div>
+          <h1>Showing stations data for station code: {{stationCode}}</h1>
+      </div>
+    </div>
+  </div>
+
+<div class="card info">
+    <div class="card-body">
+        <div class="input-group info">
+            <div class="input-group-prepend">
+            <span class="input-group-text" id="">Range [meters]</span>
+            </div>
+            <input #minInput type="text" class="form-control" value="{{minDist}}">
+            <input #maxInput type="text" class="form-control" value="{{maxDist}}">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" (click)="search(minInput.value, maxInput.value)">Search</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card info">
+    <div class="card-body">
+        <ng-container>    
+            <div>
+                <mat-form-field>
+                  <mat-label>Filter</mat-label>
+                  <input matInput (keyup)="applyFilter($event)" placeholder="Enter phrase" #input>
+                </mat-form-field>
+            
+                <div class="mat-elevation-z8">
+                    <table mat-table [dataSource]="dataSource" matSort>
+                        
+                      <ng-container matColumnDef="station_code">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Station code</th>
+                        <td mat-cell *matCellDef="let reading"> {{reading.station_code}} </td>
+                      </ng-container>
+        
+                      <ng-container matColumnDef="station_name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Station name </th>
+                        <td mat-cell *matCellDef="let reading"> {{reading.station_name}} </td>
+                      </ng-container>
+        
+                      <ng-container matColumnDef="sensor_id">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Sensor ID </th>
+                        <td mat-cell *matCellDef="let reading"> {{reading.sensor_id}} </td>
+                      </ng-container>
+                
+                      <ng-container matColumnDef="pollutant">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Pollutant </th>
+                        <td mat-cell *matCellDef="let reading"> {{reading.pollutant}} </td>
+                      </ng-container>
+                
+                      <ng-container matColumnDef="pollutant_symbol">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Pollutant symbol </th>
+                        <td mat-cell *matCellDef="let reading"> {{reading.pollutant_symbol}} </td>
+                      </ng-container>
+                
+                      <ng-container matColumnDef="measurement_date">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Measurement date </th>
+                        <td mat-cell *matCellDef="let reading"> {{reading.measurement_date}} </td>
+                      </ng-container>
+                
+                      <ng-container matColumnDef="measurement_value">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Measurement value </th>
+                        <td mat-cell *matCellDef="let reading"> {{reading.measurement_value}} </td>
+                      </ng-container>
+                  
+                      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+                      <tr mat-row *matRowDef="let reading; columns: columns;"></tr>
+                  
+                      <!-- Row shown when there is no matching data. -->
+                      <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell" class="no-data" colspan="4">
+                            <mat-icon>block</mat-icon> 
+                            No data found for selected range
+                        </td>
+                      </tr>
+                    </table>
+                </div>
+            </div>
+          </ng-container>
+    </div>
+  </div>
+  
+
