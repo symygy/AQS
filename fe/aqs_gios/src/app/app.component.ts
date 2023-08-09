@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { GiosApiService } from './gios-api.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,6 +10,10 @@ import { GiosApiService } from './gios-api.service';
 export class AppComponent {
   title = 'AQS GIOŚ';
 
-  constructor () {}
+  constructor (private router: Router) {}
+
+  getMeHome() {
+    this.router.navigate(['']);
+  }
 
 }

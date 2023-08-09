@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 })
 export class StationsComponent implements AfterViewInit  {
   stations: StationGios[] = []
-  columns: string[] = ['station_id', 'station_code', 'station_name', 'city_id', 'city', 'street','voivodeship', 'location', 'data']
+  columns: string[] = ['station_id', 'station_code', 'station_name', 'city_id', 'city', 'street','voivodeship', 'location', 'data', 'range']
   dataSource: any;
   showMap: boolean = false;
   URL: string = ""
@@ -46,8 +46,11 @@ export class StationsComponent implements AfterViewInit  {
   }
 
   getData(code: string) {
-    this.router.navigate(['/readings'], { queryParams: { stationCode: code } });
+    this.router.navigate(['/readings'], { queryParams: { stationCode: code }});
+  }
 
+  getDataInRange(code: string) {
+    this.router.navigate(['/range'], { queryParams: { stationCode: code }});
   }
 
 }

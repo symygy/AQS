@@ -5,6 +5,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [ReadingsComponent],
@@ -14,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatTableModule,
     MatInputModule,
     MatFormFieldModule,
+    MatIconModule
   ]
 })
 export class ReadingsModule { }

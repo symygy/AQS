@@ -18,12 +18,14 @@ export class ReadingsComponent {
   @ViewChild(MatSort) sort!: MatSort;
   pollutants: string[] = []
   selectedPollutants: string[] = []
+  stationCode = ''
 
 
   constructor(private APIService: GiosApiService, private route: ActivatedRoute) {
     this.route.queryParams.subscribe(params => {
       if (params['stationCode'] !== undefined) {
         this.getReadings(params['stationCode'])
+        this.stationCode = params['stationCode']
       }
     })
   }
@@ -34,12 +36,21 @@ export class ReadingsComponent {
   }
 
   getReadings(code: string = ''){
-    this.APIService.getReadings(code).subscribe(
-      (readings) => {
+    this.APIService.getReadings(code).subscribe({
+      next: (readings) => {
         this.readings = readings
-        this.dataSource = new MatTableDataSource(readings)
+
+    },
+      error: () => {
+        this.readings = []
+        this.dataSource = new MatTableDataSource(this.readings)
+      },
+      complete: () => {
+        this.dataSource = new MatTableDataSource(this.readings)
         this.dataSource.sort = this.sort;
         this.selectedPollutants = Object.assign([], this.pollutants);
+      } 
+  
     })
   }
 

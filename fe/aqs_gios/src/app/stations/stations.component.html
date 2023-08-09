@@ -1,4 +1,3 @@
-<button (click)="getData('123')">TEST</button>
 <div>  
   <div class="station-table">
     <mat-form-field>
@@ -47,14 +46,21 @@
         <ng-container matColumnDef="location">
           <th mat-header-cell *matHeaderCellDef> Location </th>
           <td mat-cell *matCellDef="let station"> 
-            <mat-icon type="button" (click)="showLocation(station.location)" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">location_on</mat-icon>
+            <mat-icon class="btn-icon" type="button" (click)="showLocation(station.location)" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">location_on</mat-icon>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="data">
           <th mat-header-cell *matHeaderCellDef> Data </th>
           <td mat-cell *matCellDef="let station"> 
-            <button type="button"(click)="getData(station.station_code)" class="btn btn-info btn-sm">data</button>
+            <mat-icon class="btn-icon" type="button" (click)="getData(station.station_code)">sd_card</mat-icon>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="range">
+          <th mat-header-cell *matHeaderCellDef> Range </th>
+          <td mat-cell *matCellDef="let station"> 
+            <mat-icon class="btn-icon" type="button" (click)="getDataInRange(station.station_code)">gps_not_fixed</mat-icon>
           </td>
         </ng-container>
 

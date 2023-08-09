@@ -12,6 +12,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { ReadingsComponent } from './readings/readings.component';
 import { ReadingsModule } from './readings/readings.module';
+import { RangeComponent } from './range/range.component';
+import { RangeModule } from './range/range.module';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [
@@ -25,11 +28,14 @@ import { ReadingsModule } from './readings/readings.module';
     DashboardModule,
     StationsModule,
     ReadingsModule,
+    MatIconModule,
+    RangeModule,
     RouterModule.forRoot([
       {path: '', component: StationsComponent},
       // {path: 'dash', component: DashboardComponent},
       // {path: 'stations', component: StationsComponent},
       {path: 'readings', component: ReadingsComponent},
+      {path: 'range', component: RangeComponent},
     ]),
     NgbModule,
     ModalModule.forRoot()
